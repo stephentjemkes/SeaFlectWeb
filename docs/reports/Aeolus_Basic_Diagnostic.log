@@ -32,9 +32,8 @@ nbclient.exceptions.CellTimeoutError: A cell timed out while it was being execut
 The message was: Cell execution timed out.
 Here is a preview of the cell contents:
 -------------------
-# now that we have a consistent dataset we can make an annual
-AeolusProductObject._create_annual_(periods=valid_period)
-# and globa
-AeolusProductObject._create_global_(regions=available_regions)
+['import logging', 'import sys', 'sys.path.append(os.path.join(os.environ["HOME"],"Projects","SeaFlect","python"))', 'from DataPoolAccessModule import AeolusDataClass', 'from DataPoolAccessModule import QualityControlClass']
+...
+['AeolusProductObject._create_global_(regions=available_regions)', '', '#definitions of range bins accoring to c-convention', '', 'range_bin={"top":0, "atmosphere":3, "surface":4, "ocean":5, "background":6}']
 -------------------
 
