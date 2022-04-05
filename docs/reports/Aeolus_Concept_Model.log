@@ -1,0 +1,83 @@
+Traceback (most recent call last):
+  File "/home/wrfda/local/lib/python3.10/site-packages/jupyter_cache/executors/utils.py", line 51, in single_nb_execution
+    executenb(
+  File "/home/wrfda/local/lib/python3.10/site-packages/nbclient/client.py", line 1204, in execute
+    return NotebookClient(nb=nb, resources=resources, km=km, **kwargs).execute()
+  File "/home/wrfda/local/lib/python3.10/site-packages/nbclient/util.py", line 84, in wrapped
+    return just_run(coro(*args, **kwargs))
+  File "/home/wrfda/local/lib/python3.10/site-packages/nbclient/util.py", line 62, in just_run
+    return loop.run_until_complete(coro)
+  File "/home/wrfda/local/lib/python3.10/asyncio/base_events.py", line 641, in run_until_complete
+    return future.result()
+  File "/home/wrfda/local/lib/python3.10/site-packages/nbclient/client.py", line 663, in async_execute
+    await self.async_execute_cell(
+  File "/home/wrfda/local/lib/python3.10/site-packages/nbclient/client.py", line 965, in async_execute_cell
+    await self._check_raise_for_error(cell, cell_index, exec_reply)
+  File "/home/wrfda/local/lib/python3.10/site-packages/nbclient/client.py", line 862, in _check_raise_for_error
+    raise CellExecutionError.from_cell_and_msg(cell, exec_reply_content)
+nbclient.exceptions.CellExecutionError: An error occurred while executing the following cell:
+------------------
+region="E"
+period="AnnualCycle"
+qc_level = "sgnl_scat_snr_stdev"
+#
+AeolusProductObject.snr_up=20
+AeolusProductObject.snr_low=10
+AeolusProductObject.sunalt_threshold=-7
+
+qc = AeolusProductObject.apply_quality_control(level=qc_level, period=period, region=region)
+
+dataset =AeolusProductObject.data_pool[period][region]
+if qc == None:
+    time_range=slice(kwargs["time_range"][0], kwargs["time_range"][1])
+else:
+    time_range=qc[0]
+
+time = dataset["L1Bmie"]["date"][time_range]
+
+x = dataset["MET"]["surface_wind_speed"][time_range]
+
+#basic signal
+col = dataset["L1Bmie"]["snr"][time_range,AeolusProductObject.layer_index["surface"]]
+mapper = linear_cmap(field_name='col', palette=Spectral11 ,low=min(col) ,high=max(col))
+
+# cm results
+y = dataset["Product"]["Reflectance"]["Cm"][time_range]
+
+source = ColumnDataSource({'x':x,'y':y,'col':col})
+graphic=[]                   
+p=figure(plot_width=400, plot_height=300, \
+         tools="box_zoom,pan,crosshair, reset,save,wheel_zoom", \
+         title="Raw input {} {}".format(period, region))
+p.circle( "x", "y", source=source ,line_color=mapper,color=mapper,size = 5)
+p.line(wind_speed, Cm["high"][0,:],color="blue", legend_label="high" )
+p.line(wind_speed, Cm["low"][0,:],color="green", legend_label="low" )
+p.xaxis.axis_label = 'wind speed [m/s]'
+p.yaxis.axis_label = 'ACCD '
+p.x_range = Range1d(0, 25)
+p.y_range=Range1d(0,0.05)
+bar = ColorBar(color_mapper=mapper['transform'], width=8, location=(0,0))
+p.add_layout(bar, "left")
+graphic.append(p)
+
+plot = gridplot(graphic, ncols=1, width=800, height=500, toolbar_location="right")
+
+show(plot)
+if export:
+    figure_name = os.path.join(figure_path,"correlation_accd_windspeed_{}_{}.png".format(period, region))
+    export_png(plot, filename=figure_name)
+
+------------------
+
+[0;31m---------------------------------------------------------------------------[0m
+[0;31mTypeError[0m                                 Traceback (most recent call last)
+Input [0;32mIn [4][0m, in [0;36m<cell line: 23>[0;34m()[0m
+[1;32m     21[0m [38;5;66;03m#basic signal[39;00m
+[1;32m     22[0m col [38;5;241m=[39m dataset[[38;5;124m"[39m[38;5;124mL1Bmie[39m[38;5;124m"[39m][[38;5;124m"[39m[38;5;124msnr[39m[38;5;124m"[39m][time_range,AeolusProductObject[38;5;241m.[39mlayer_index[[38;5;124m"[39m[38;5;124msurface[39m[38;5;124m"[39m]]
+[0;32m---> 23[0m mapper [38;5;241m=[39m linear_cmap(field_name[38;5;241m=[39m[38;5;124m'[39m[38;5;124mcol[39m[38;5;124m'[39m, palette[38;5;241m=[39mSpectral11 ,low[38;5;241m=[39m[38;5;28;43mmin[39;49m[43m([49m[43mcol[49m[43m)[49m ,high[38;5;241m=[39m[38;5;28mmax[39m(col))
+[1;32m     25[0m [38;5;66;03m# cm results[39;00m
+[1;32m     26[0m y [38;5;241m=[39m dataset[[38;5;124m"[39m[38;5;124mProduct[39m[38;5;124m"[39m][[38;5;124m"[39m[38;5;124mReflectance[39m[38;5;124m"[39m][[38;5;124m"[39m[38;5;124mCm[39m[38;5;124m"[39m][time_range]
+
+[0;31mTypeError[0m: 'numpy.float64' object is not iterable
+TypeError: 'numpy.float64' object is not iterable
+
